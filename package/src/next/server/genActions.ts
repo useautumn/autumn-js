@@ -136,3 +136,31 @@ export const getBillingPortalAction = withAuth({
     return toServerResponse(result);
   },
 });
+
+export const generateReferralCodeAction = withAuth({
+  fn: async ({
+    customerId,
+    programId,
+  }: {
+    customerId: string;
+    programId: string;
+  }) => {
+    const autumn = createAutumnClient();
+    let result = await autumn.customers.generateReferralCode({
+      customer_id: customerId,
+      program_id: programId,
+    });
+    return toServerResponse(result);
+  },
+});
+
+export const redeemReferralCodeAction = withAuth({
+  fn: async ({ code, customerId }: { code: string; customerId: string }) => {
+    const autumn = createAutumnClient();
+    let result = await autumn.customers.redeemReferralCode({
+      code,
+      customer_id: customerId,
+    });
+    return toServerResponse(result);
+  },
+});

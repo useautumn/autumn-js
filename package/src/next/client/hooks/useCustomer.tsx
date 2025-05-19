@@ -9,6 +9,10 @@ import {
   createEntityAction,
   deleteEntityAction,
 } from "../../server/cusActions";
+import {
+  generateReferralCodeAction,
+  redeemReferralCodeAction,
+} from "../../server/genActions";
 import { CustomerExpandOption } from "../../../sdk/customers/cusEnums";
 import { CreateEntityParams } from "./types";
 import { CreateEntityParams as ServerCreateEntityParams } from "../../../sdk/customers/entities/entTypes";
@@ -152,6 +156,28 @@ export const useCustomer = (options?: UseCustomerProps) => {
     return result;
   };
 
+  const generateReferralCode = async (programId: string) => {
+    const result = await generateReferralCodeAction({
+      encryptedCustomerId,
+      programId,
+    });
+    if (result.error) {
+      return toClientErrorResponse(result.error);
+    }
+    return result;
+  };
+
+  const redeemReferralCode = async (code: string) => {
+    const result = await redeemReferralCodeAction({
+      code,
+      encryptedCustomerId,
+    });
+    if (result.error) {
+      return toClientErrorResponse(result.error);
+    }
+    return result;
+  };
+
   useEffect(() => {
     fetchCustomer();
   }, [encryptedCustomerId]);
@@ -164,5 +190,7 @@ export const useCustomer = (options?: UseCustomerProps) => {
     createEntity,
     deleteEntity: (entityId: string) =>
       deleteEntity({ encryptedCustomerId, entityId }),
+    generateReferralCode,
+    redeemReferralCode,
   };
 };

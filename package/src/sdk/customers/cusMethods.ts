@@ -6,6 +6,10 @@ import {
   BillingPortalParams,
   BillingPortalResponse,
   GetCustomerParams,
+  GenerateReferralCodeParams,
+  GenerateReferralCodeResponse,
+  RedeemReferralCodeParams,
+  RedeemReferralCodeResponse,
 } from "./cusTypes";
 import { staticWrapper } from "../utils";
 import { AutumnPromise } from "../response";
@@ -22,6 +26,10 @@ export const customerMethods = (instance?: Autumn) => {
     delete: (id: string) => staticWrapper(deleteCustomer, instance, { id }),
     billingPortal: (id: string, params?: BillingPortalParams) =>
       staticWrapper(billingPortal, instance, { id, params }),
+    generateReferralCode: (params: GenerateReferralCodeParams) =>
+      staticWrapper(generateReferralCode, instance, { params }),
+    redeemReferralCode: (params: RedeemReferralCodeParams) =>
+      staticWrapper(redeemReferralCode, instance, { params }),
   };
 };
 
@@ -96,4 +104,24 @@ export const billingPortal = async ({
   params?: BillingPortalParams;
 }): AutumnPromise<BillingPortalResponse> => {
   return instance.post(`/customers/${id}/billing_portal`, params);
+};
+
+export const generateReferralCode = async ({
+  instance,
+  params,
+}: {
+  instance: Autumn;
+  params: GenerateReferralCodeParams;
+}): AutumnPromise<GenerateReferralCodeResponse> => {
+  return instance.post(`/referrals/code`, params);
+};
+
+export const redeemReferralCode = async ({
+  instance,
+  params,
+}: {
+  instance: Autumn;
+  params: RedeemReferralCodeParams;
+}): AutumnPromise<RedeemReferralCodeResponse> => {
+  return instance.post(`/referrals/redeem`, params);
 };
