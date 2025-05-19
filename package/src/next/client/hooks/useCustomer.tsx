@@ -1,7 +1,7 @@
 import { AutumnError } from "../../../sdk";
 import { Customer, CustomerData } from "../../../sdk";
-
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import useSWR from "swr";
 import { useAutumnContext } from "../AutumnContext";
 import {
   getOrCreateCustomer,
@@ -9,6 +9,10 @@ import {
   createEntityAction,
   deleteEntityAction,
 } from "../../server/cusActions";
+import {
+  generateReferralCodeAction,
+  redeemReferralCodeAction,
+} from "../../server/genActions";
 import { CustomerExpandOption } from "../../../sdk/customers/cusEnums";
 import { CreateEntityParams } from "./types";
 import { CreateEntityParams as ServerCreateEntityParams } from "../../../sdk/customers/entities/entTypes";
@@ -51,82 +55,97 @@ const deleteEntity = async ({
   return result;
 };
 
+const fetcher = async (
+  key: string,
+  options: {
+    encryptedCustomerId?: string;
+    customerData?: CustomerData;
+    expand?: CustomerExpandOption[];
+    autoCreate: boolean;
+    errorOnNotFound: boolean;
+  }
+) => {
+  const {
+    encryptedCustomerId,
+    customerData,
+    expand,
+    autoCreate,
+    errorOnNotFound,
+  } = options;
+
+  if (autoCreate) {
+    const result = await getOrCreateCustomer({
+      encryptedCustomerId,
+      customerData,
+      params: { expand },
+    });
+
+    if (result.error) {
+      if (result.error.code === "no_customer_id" && !errorOnNotFound) {
+        return null;
+      }
+      throw toClientError(result.error);
+    }
+    return result.data;
+  }
+
+  const result = await getCustomer({
+    encryptedCustomerId,
+    params: { expand },
+  });
+
+  if (result.error) {
+    if (result.error.code === "no_customer_id" && !errorOnNotFound) {
+      return null;
+    }
+    throw toClientError(result.error);
+  }
+  return result.data;
+};
+
 export const useCustomer = (options?: UseCustomerProps) => {
   let finalOptions = defaultOptions;
 
   if (options) {
     finalOptions = { ...defaultOptions, ...options };
   }
-  const { autoCreate } = finalOptions;
 
   const {
     encryptedCustomerId: contextEncryptedCustomerId,
     customerData: contextCustomerData,
-    customer,
     setCustomer,
   } = useAutumnContext();
 
   const encryptedCustomerId =
     finalOptions.encryptedCustomerId || contextEncryptedCustomerId;
-
   const customerData = finalOptions.customerData || contextCustomerData;
-  const errorOnNotFound = finalOptions.errorOnNotFound;
 
-  const [error, setError] = useState<AutumnClientError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const fetchCustomer = async () => {
-    setIsLoading(true);
-
-    let returnData: Customer | null = null;
-    try {
-      let data: Customer | null = null;
-      let error: AutumnError | null = null;
-
-      if (autoCreate) {
-        const result = await getOrCreateCustomer({
-          encryptedCustomerId,
-          customerData,
-          params: {
-            expand: finalOptions.expand,
-          },
-        });
-
-        data = result.data;
-        error = result.error;
-      } else {
-        const result = await getCustomer({
-          encryptedCustomerId,
-          params: {
-            expand: finalOptions.expand,
-          },
-        });
-        data = result.data;
-        error = result.error;
-      }
-
-      if (error) {
-        if (error && error?.code == "no_customer_id" && !errorOnNotFound) {
-        } else {
-          setError(toClientError(error));
-        }
-      } else {
-        setCustomer(data);
-        setError(null);
-      }
-
-      returnData = data;
-    } catch (error) {
-      setError(toClientError(error));
+  const {
+    data: customer,
+    error,
+    isLoading,
+    mutate,
+  } = useSWR<Customer | null, AutumnClientError>(
+    encryptedCustomerId ? ["customer", encryptedCustomerId] : null,
+    ([_key, id]: [string, string]) =>
+      fetcher(id, {
+        encryptedCustomerId: id,
+        customerData,
+        expand: finalOptions.expand,
+        autoCreate: finalOptions.autoCreate ?? true,
+        errorOnNotFound: finalOptions.errorOnNotFound ?? true,
+      }),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 5000,
     }
+  );
 
-    setIsLoading(false);
-    return returnData;
-  };
-
-  const refetch = async () => {
-    await fetchCustomer();
-  };
+  useEffect(() => {
+    if (customer) {
+      setCustomer(customer);
+    }
+  }, [customer, setCustomer]);
 
   const createEntity = async (
     params: CreateEntityParams | CreateEntityParams[]
@@ -149,20 +168,41 @@ export const useCustomer = (options?: UseCustomerProps) => {
       return toClientErrorResponse(result.error);
     }
 
+    await mutate();
     return result;
   };
 
-  useEffect(() => {
-    fetchCustomer();
-  }, [encryptedCustomerId]);
+  const generateReferralCode = async (programId: string) => {
+    const result = await generateReferralCodeAction({
+      encryptedCustomerId,
+      programId,
+    });
+    if (result.error) {
+      return toClientErrorResponse(result.error);
+    }
+    return result;
+  };
+
+  const redeemReferralCode = async (code: string) => {
+    const result = await redeemReferralCodeAction({
+      code,
+      encryptedCustomerId,
+    });
+    if (result.error) {
+      return toClientErrorResponse(result.error);
+    }
+    return result;
+  };
 
   return {
     customer,
     isLoading,
     error,
-    refetch,
+    refetch: () => mutate(),
     createEntity,
     deleteEntity: (entityId: string) =>
       deleteEntity({ encryptedCustomerId, entityId }),
+    generateReferralCode,
+    redeemReferralCode,
   };
 };

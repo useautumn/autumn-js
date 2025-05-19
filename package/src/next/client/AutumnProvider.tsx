@@ -4,6 +4,7 @@ import { AutumnContext } from "./AutumnContext";
 import { useEffect, useState } from "react";
 import { Customer, PricingTableProduct } from "src/sdk";
 import { useCustomer } from "./hooks/useCustomer";
+import { SWRConfig } from "swr";
 
 export interface AutumnProviderProps {
   children?: React.ReactNode;
@@ -86,55 +87,63 @@ export const AutumnClientProvider = ({
   ] = useDialog(components?.paywallDialog);
 
   return (
-    <AutumnContext.Provider
+    <SWRConfig
       value={{
-        encryptedCustomerId,
-        customerData,
-        customer,
-        setCustomer,
-        prodChangeDialog: {
-          found: prodChangeDialogFound,
-          setProps: setProdChangeDialogProps,
-          setOpen: setProdChangeDialogOpen,
-          setComponent: (component: any) => {
-            setComponents({
-              ...components,
-              productChangeDialog: component,
-            });
-          },
-        },
-        paywallDialog: {
-          found: paywallFound,
-          setProps: setPaywallProps,
-          setOpen: setPaywallOpen,
-          setComponent: (component: any) => {
-            setComponents({
-              ...components,
-              paywallDialog: component,
-            });
-          },
-        },
-        pricingTableProducts,
-        setPricingTableProducts,
-        entity,
-        setEntity,
+        revalidateOnFocus: false,
+        dedupingInterval: 5000,
+        shouldRetryOnError: false,
       }}
     >
-      {components?.productChangeDialog && (
-        <components.productChangeDialog
-          open={prodChangeDialogOpen}
-          setOpen={setProdChangeDialogOpen}
-          {...prodChangeDialogProps}
-        />
-      )}
-      {components?.paywallDialog && (
-        <components.paywallDialog
-          open={paywallOpen}
-          setOpen={setPaywallOpen}
-          {...paywallProps}
-        />
-      )}
-      {children}
-    </AutumnContext.Provider>
+      <AutumnContext.Provider
+        value={{
+          encryptedCustomerId,
+          customerData,
+          customer,
+          setCustomer,
+          prodChangeDialog: {
+            found: prodChangeDialogFound,
+            setProps: setProdChangeDialogProps,
+            setOpen: setProdChangeDialogOpen,
+            setComponent: (component: any) => {
+              setComponents({
+                ...components,
+                productChangeDialog: component,
+              });
+            },
+          },
+          paywallDialog: {
+            found: paywallFound,
+            setProps: setPaywallProps,
+            setOpen: setPaywallOpen,
+            setComponent: (component: any) => {
+              setComponents({
+                ...components,
+                paywallDialog: component,
+              });
+            },
+          },
+          pricingTableProducts,
+          setPricingTableProducts,
+          entity,
+          setEntity,
+        }}
+      >
+        {components?.productChangeDialog && (
+          <components.productChangeDialog
+            open={prodChangeDialogOpen}
+            setOpen={setProdChangeDialogOpen}
+            {...prodChangeDialogProps}
+          />
+        )}
+        {components?.paywallDialog && (
+          <components.paywallDialog
+            open={paywallOpen}
+            setOpen={setPaywallOpen}
+            {...paywallProps}
+          />
+        )}
+        {children}
+      </AutumnContext.Provider>
+    </SWRConfig>
   );
 };

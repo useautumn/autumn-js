@@ -94,3 +94,26 @@ export interface CustomerInvoice {
   currency: string;
   created_at: number;
 }
+
+export interface GenerateReferralCodeParams {
+  customer_id: string;
+  program_id: string;
+}
+
+export interface GenerateReferralCodeResponse {
+  code: string;
+  customer_id: string;
+  created_at: number;
+}
+
+export interface RedeemReferralCodeParams {
+  code: string;
+  customer_id: string;
+}
+
+export interface RedeemReferralCodeResponse {
+  id: string;
+  customer_id: string;
+  applied: boolean;
+  reward_id: string;
+}
