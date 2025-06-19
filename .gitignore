@@ -1,18 +1,36 @@
-node_modules/
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
 dist/
+build
+.next/
+out/
 
-.env.*
-
-
+# Local env files
 .env
+.env.*
 **/.env*
 !examples/next-clerk/.env.local
 
-/archive
-# nextjs
+# Testing
+coverage
 
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Turbo and Vercel
+.turbo
+.vercel
+
+# System files
 .DS_Store
-new
+*.pem
 
-# ignore any .next folder in any directory
-**/.next/
+# Old project-specific ignores
+new
+/archive
