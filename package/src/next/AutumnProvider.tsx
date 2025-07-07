@@ -15,6 +15,7 @@ const notNullish = (value: any) => {
   return value !== null && value !== undefined;
 };
 
+/** @deprecated use NextAutumnProvider from autumn-js/next */
 export const AutumnProvider = ({
   customerId,
   customerData,
