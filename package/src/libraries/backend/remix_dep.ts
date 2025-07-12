@@ -1,4 +1,3 @@
-// app/lib/autumn-handler.ts
 import { Autumn } from "../../sdk";
 import { createRouterWithOptions } from "./routes/backendRouter";
 import { findRoute } from "rou3";

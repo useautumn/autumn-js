@@ -17,7 +17,7 @@
     "publish-beta": "pnpm publish --tag beta",
     "dev-old": "tsx scripts/sync-registry.ts sync && (tsx scripts/sync-registry.ts watch & nodemon --watch src --ext ts,tsx,css --exec \"tsup --config tsup.dev.config.ts\")",
     "dev": "(tsx scripts/sync-registry.ts watch & nodemon --watch src --ext ts,tsx,css --exec \"tsup --config tsup.dev.config.ts && node scripts/post-build.js\")",
-    "dev2": "nodemon --watch src --ext ts,tsx,css --exec \"tsup --config tsup.dev.config.ts",
+    "dev2": "nodemon --watch src --ext ts,tsx,css --exec \"tsup --config tsup.dev.config.ts\"",
     "sync-registry": "tsx scripts/sync-registry.ts sync",
     "watch-registry": "tsx scripts/sync-registry.ts watch"
   },
@@ -78,6 +78,11 @@
       "types": "./dist/libraries/backend/convex.d.ts",
       "require": "./dist/libraries/backend/convex.js",
       "import": "./dist/libraries/backend/convex.mjs"
+    },
+    "./elysia": {
+      "types": "./dist/libraries/backend/elysia.d.ts",
+      "require": "./dist/libraries/backend/elysia.js",
+      "import": "./dist/libraries/backend/elysia.mjs"
     }
   },
   "keywords": [
@@ -141,6 +146,7 @@
   },
   "dependencies": {
     "chalk": "^5.4.1",
+    "elysia": "^1.3.5",
     "rou3": "^0.6.1",
     "swr": "^2.3.3",
     "zod": "^3.24.1"
