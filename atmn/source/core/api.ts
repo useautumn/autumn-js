@@ -43,7 +43,7 @@ export async function request({
 			throw error;
 		}
 		console.error(
-			chalk.red('Error occured when making API request:'),
+			chalk.red('Error occurred when making API request:'),
 			chalk.red(error.response.data.message || error.response.data.error),
 		);
 		process.exit(1);

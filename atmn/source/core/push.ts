@@ -36,6 +36,13 @@ const isDuplicate = (error: any) => {
 };
 
 export async function upsertFeature(feature: Feature) {
+	if (!feature.name || feature.name.trim() === '') {
+		console.error(
+			`\nYou tried to create a feature without a name, please add a name to ${feature.id}`,
+		);
+		process.exit(1);
+	}
+
 	try {
 		const response = await externalRequest({
 			method: 'POST',
