@@ -1,6 +1,7 @@
 import { ProductItem } from "@sdk/products/prodTypes";
 import { AppEnv } from "../general/genEnums";
 import { ProductItemInterval } from "../products/prodEnums";
+import { CustomerPaymentMethod } from "./cusExpandTypes";
 import {
   CustomerExpandEnum,
   CustomerExpandOption,
@@ -108,6 +109,7 @@ export interface Customer {
   products: CustomerProduct[];
   features: Record<string, CustomerFeature>;
   invoices?: CustomerInvoice[];
+  payment_method?: CustomerPaymentMethod;
 }
 
 export const CustomerDataSchema = z.object({
