@@ -23,6 +23,8 @@ export const ReactAutumnProvider = ({
   customerData,
   includeCredentials,
   betterAuthUrl,
+  customHeaders,
+  corsOrigin,
 }: {
   children: React.ReactNode;
   getBearerToken?: () => Promise<string | null | undefined>;
@@ -30,6 +32,8 @@ export const ReactAutumnProvider = ({
   customerData?: CustomerData;
   includeCredentials?: boolean;
   betterAuthUrl?: string;
+  customHeaders?: Record<string, string>;
+  corsOrigin?: string;
 }) => {
   let client = new AutumnClient({
     backendUrl: getBackendUrl(backendUrl),
@@ -37,6 +41,8 @@ export const ReactAutumnProvider = ({
     customerData,
     includeCredentials,
     betterAuthUrl,
+    customHeaders,
+    corsOrigin,
   });
 
   return (
