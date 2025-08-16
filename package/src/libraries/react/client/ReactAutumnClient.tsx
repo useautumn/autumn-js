@@ -46,6 +46,7 @@ export interface AutumnClientConfig {
   includeCredentials?: boolean;
   betterAuthUrl?: string;
   headers?: Record<string, string>;
+  prefix?: string;
 }
 
 export class AutumnClient {
@@ -63,12 +64,13 @@ export class AutumnClient {
     includeCredentials,
     betterAuthUrl,
     headers,
+    prefix,
   }: AutumnClientConfig) {
     this.backendUrl = backendUrl;
     this.getBearerToken = getBearerToken;
     this.customerData = customerData;
     this.includeCredentials = includeCredentials;
-    this.prefix = "/api/autumn";
+    this.prefix = prefix || "/api/autumn";
 
     if (betterAuthUrl) {
       this.prefix = "/api/auth/autumn";
