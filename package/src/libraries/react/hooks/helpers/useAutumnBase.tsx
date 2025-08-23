@@ -18,6 +18,7 @@ import { usePricingTableBase } from "../usePricingTableBase";
 import { AttachResult } from "@sdk/general/attachTypes";
 import { AttachParams, CheckoutParams } from "@/client/types/clientAttachTypes";
 import { AutumnClient } from "@/client/ReactAutumnClient";
+import { ConvexAutumnClient } from "@/client/ConvexAutumnClient";
 
 export const useAutumnBase = ({
   // AutumnContext,
@@ -27,7 +28,7 @@ export const useAutumnBase = ({
 }: {
   // AutumnContext: React.Context<AutumnContextParams>;
   context?: AutumnContextParams;
-  client: AutumnClient;
+  client: AutumnClient | ConvexAutumnClient;
   refetchCustomer?: () => Promise<any>;
 }) => {
   const { attachDialog, paywallDialog } = context || {};
@@ -71,7 +72,7 @@ export const useAutumnBase = ({
     }
 
     const hasPrepaid = data.product.items.some(
-      (item) => item.usage_model === "prepaid"
+      (item: any) => item.usage_model === "prepaid"
     );
 
     const showDialog = hasPrepaid && params.dialog;

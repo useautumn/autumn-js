@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { useState, useEffect } from "react";
-import { AutumnClient } from "./client/ReactAutumnClient";
+import { IAutumnClient } from "./client/ReactAutumnClient";
 import { useDialog } from "./hooks/helpers/useDialog";
 import { useCustomerBase } from "./hooks/useCustomerBase";
 
@@ -11,7 +11,7 @@ export function BaseAutumnProvider({
   children,
   AutumnContext,
 }: {
-  client: AutumnClient;
+  client: IAutumnClient;
   children: React.ReactNode;
   AutumnContext: any;
 }) {
@@ -30,7 +30,9 @@ export function BaseAutumnProvider({
     setProductChangeOpen,
   ] = useDialog(components.productChangeDialog);
 
-  useCustomerBase({ client, params: { errorOnNotFound: false } });
+  // Always call useCustomerBase, but pass the client as any to avoid type issues
+  // The hook will work with both HTTP and Convex clients
+  useCustomerBase({ client: client as any, params: { errorOnNotFound: false } });
 
   const paywallRef = useRef<any>(null);
 

@@ -1,8 +1,10 @@
 import { logAuthError } from "@/errorUtils/logAuthError";
 import {
   AutumnError,
+  AutumnPromise,
   CreateCustomerParams,
   CustomerData,
+  Product,
   toContainerResult,
 } from "../../../sdk";
 import { logFetchError } from "../errorUtils/logFetchError";
@@ -48,10 +50,55 @@ export interface AutumnClientConfig {
   headers?: Record<string, string>;
 }
 
-export class AutumnClient {
+export interface IAutumnClient {
+  readonly backendUrl?: string;
+  readonly prefix: string;
+  readonly headers?: Record<string, string>;
+  readonly customerData?: CustomerData;
+  
+  // Core methods
+  createCustomer(params: Omit<CreateCustomerParams, "id" | "data"> & { errorOnNotFound?: boolean }): Promise<any>;
+  getPricingTable(): Promise<any>;
+  
+  // HTTP methods (stubbed for Convex)
+  detectCors(): Promise<{ valid: boolean; includeCredentials: boolean | undefined }>;
+  shouldIncludeCredentials(): Promise<boolean>;
+  getHeaders(): Promise<Record<string, string>>;
+  handleFetch(options: { path: string; method: string; body?: any }): Promise<any>;
+  post(path: string, body: any): Promise<any>;
+  get(path: string): Promise<any>;
+  delete(path: string): Promise<any>;
+  
+  // Autumn methods
+  attach(args: any): Promise<any>;
+  checkout(args: any): Promise<any>;
+  cancel(args: any): Promise<any>;
+  check(args: any): Promise<any>;
+  track(args: any): Promise<any>;
+  openBillingPortal(args: any): Promise<any>;
+  setupPayment(args: any): Promise<any>;
+  query(args: any): Promise<any>;
+  
+  entities: {
+    create(args: any): Promise<any>;
+    get(args: any): Promise<any>;
+    delete(args: any): Promise<any>;
+  };
+  
+  referrals: {
+    createCode(args: any): Promise<any>;
+    redeemCode(args: any): Promise<any>;
+  };
+  
+  products: {
+    list(): AutumnPromise<{ list: Product[]}>;
+  };
+}
+
+export class AutumnClient implements IAutumnClient {
   public readonly backendUrl?: string;
   protected readonly getBearerToken?: () => Promise<string | null | undefined>;
-  protected readonly customerData?: CustomerData;
+  public readonly customerData?: CustomerData;
   protected includeCredentials?: boolean;
   public readonly prefix: string;
   public readonly headers?: Record<string, string>;
@@ -81,7 +128,7 @@ export class AutumnClient {
   /**
    * Detects if the backend supports CORS credentials by making an OPTIONS request
    */
-  private async detectCors() {
+  public async detectCors() {
     if (this.prefix?.includes("/api/auth")) {
       return { valid: true, includeCredentials: true };
     }
@@ -117,7 +164,8 @@ export class AutumnClient {
   /**
    * Automatically determines whether to include credentials based on CORS detection
    */
-  private async shouldIncludeCredentials(): Promise<boolean> {
+  public async shouldIncludeCredentials(): Promise<boolean> {
+    // If explicitly set, always use that value
     if (this.includeCredentials !== undefined) {
       return this.includeCredentials;
     }
@@ -134,9 +182,11 @@ export class AutumnClient {
           }} in <AutumnProvider />`
         );
         this.includeCredentials = corsResult.includeCredentials;
+        return corsResult.includeCredentials || false;
       }
 
-      return corsResult.includeCredentials || false;
+      console.warn(`[Autumn] CORS detection failed, defaulting to false`);
+      return false;
     } catch (error: any) {
       console.error(`[Autumn] Error detecting CORS: ${error.message}`);
       return false;

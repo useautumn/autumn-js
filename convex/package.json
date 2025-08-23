@@ -1,0 +1,81 @@
+{
+  "name": "@atmn-hq/convex",
+  "description": "A autumn component for Convex.",
+  "repository": "github:useautumn/autumn-js",
+  "homepage": "https://github.com/useautumn/autumn-js#readme",
+  "bugs": {
+    "email": "support@convex.dev",
+    "url": "https://github.com/useautumn/autumn-js/issues"
+  },
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "keywords": [
+    "convex",
+    "component"
+  ],
+  "type": "module",
+  "scripts": {
+    "example": "cd example && npm run dev",
+    "dashboard": "cd example && npx convex dashboard",
+    "dev": "run-p 'example' 'build:watch'",
+    "setup": "npm i && npm run build && cd example && npm i && npx convex dev --once",
+    "build:watch": "cd src && npx chokidar '../tsconfig.json' '*.ts' 'react/**/*.ts' 'component/**/*.ts' 'client/**/*.ts' -c 'npm run build' --initial",
+    "build": "tsc --project ./tsconfig.build.json && tsc-alias -p tsconfig.build.json && echo '{ \"type\": \"module\" }' > dist/package.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist tsconfig.build.tsbuildinfo",
+    "alpha": "npm run clean && npm run build && run-p test lint typecheck attw && npm version prerelease --preid alpha && npm publish --tag alpha && git push --tags",
+    "release": "npm run clean && npm run build && run-p test lint typecheck attw && npm version patch && npm publish && git push --tags",
+    "test": "vitest run --typecheck",
+    "test:watch": "vitest --typecheck",
+    "test:debug": "vitest --inspect-brk --no-file-parallelism",
+    "test:coverage": "vitest run --coverage --coverage.reporter=text",
+    "lint": "eslint src",
+    "attw": "attw $(npm pack -s) --exclude-entrypoints ./convex.config --profile esm-only",
+    "version": "pbcopy <<<$npm_package_version; vim CHANGELOG.md && git add CHANGELOG.md"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "@convex-dev/component-source": "./src/client/index.ts",
+      "types": "./dist/client/index.d.ts",
+      "default": "./dist/client/index.js"
+    },
+    "./convex.config": {
+      "@convex-dev/component-source": "./src/component/convex.config.ts",
+      "types": "./dist/component/convex.config.d.ts",
+      "default": "./dist/component/convex.config.js"
+    }
+  },
+  "peerDependencies": {
+    "autumn-js": "workspace:*",
+    "convex": "^1.25.0",
+    "react": "^18.3.1 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.17.4",
+    "@edge-runtime/vm": "^5.0.0",
+    "@eslint/js": "9.29.0",
+    "@types/node": "18.17.0",
+    "chokidar-cli": "3.0.0",
+    "convex-test": "0.0.37",
+    "eslint": "9.29.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^15.9.0",
+    "npm-run-all2": "7.0.2",
+    "prettier": "3.2.5",
+    "tsc-alias": "^1.8.16",
+    "typescript": "5.5.4",
+    "typescript-eslint": "8.34.1",
+    "vitest": "3.2.4"
+  },
+  "types": "./dist/client/index.d.ts",
+  "module": "./dist/client/index.js",
+  "dependencies": {
+    "convex-helpers": "^0.1.104"
+  }
+}

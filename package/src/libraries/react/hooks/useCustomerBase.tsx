@@ -33,6 +33,7 @@ import { AllowedParams, handleCheck, openDialog } from "./helpers/handleCheck";
 import { AttachParams, CheckoutParams } from "@/client/types/clientAttachTypes";
 import { AttachResult, CheckoutResult } from "@sdk/general/attachTypes";
 import { Result, Success } from "@sdk/response";
+import { ConvexAutumnClient } from "@/client/ConvexAutumnClient";
 
 export interface UseCustomerResult {
   /** The current customer data including subscription and feature information */
@@ -130,7 +131,7 @@ export const useCustomerBase = ({
 }: {
   params?: UseCustomerParams;
   AutumnContext?: React.Context<any>;
-  client?: AutumnClient;
+  client?: AutumnClient | ConvexAutumnClient;
 }): UseCustomerResult => {
   let context: AutumnContextParams | undefined;
 

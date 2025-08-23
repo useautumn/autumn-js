@@ -3,6 +3,7 @@ import { AutumnError, Product } from "@sdk";
 import { ProductDetails } from "../client/types/clientPricingTableTypes";
 import { AutumnContextParams, useAutumnContext } from "../AutumnContext";
 import { AutumnClient } from "@/client/ReactAutumnClient";
+import { ConvexAutumnClient } from "@/client/ConvexAutumnClient";
 
 const mergeProductDetails = (
   products: Product[] | undefined,
@@ -191,7 +192,7 @@ export const usePricingTableBase = ({
   client,
   params,
 }: {
-  client: AutumnClient;
+  client: AutumnClient | ConvexAutumnClient;
   params?: {
     productDetails?: ProductDetails[];
   };
