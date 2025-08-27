@@ -38,7 +38,7 @@ export const autumnHandler = <ContextType extends Context = Context>(options: {
       
 
       let body = null;
-      if (c.req.method === "POST") {
+      if (c.req.method === "POST" || c.req.method === "PUT" || c.req.method === "PATCH") {
         try {
           body = await c.req.json();
         } catch (error) {}
