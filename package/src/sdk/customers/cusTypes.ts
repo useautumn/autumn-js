@@ -194,3 +194,9 @@ export const UpdateBalancesParamsSchema = z
 
 export type UpdateBalancesParams = z.infer<typeof UpdateBalancesParamsSchema>;
 export type UpdateBalancesResult = { success: boolean };
+
+export const DeleteCustomerParamsSchema = z.object({
+  delete_in_stripe: z.boolean().optional(),
+});
+
+export type DeleteCustomerParams = z.infer<typeof DeleteCustomerParamsSchema>;

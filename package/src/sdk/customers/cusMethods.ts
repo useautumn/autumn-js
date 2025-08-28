@@ -8,6 +8,7 @@ import {
   GetCustomerParams,
   UpdateBalancesParams,
   UpdateBalancesResult,
+  DeleteCustomerParams,
 } from "./cusTypes";
 import { staticWrapper } from "../utils";
 import { AutumnPromise } from "../response";
@@ -21,7 +22,7 @@ export const customerMethods = (instance?: Autumn) => {
       staticWrapper(createCustomer, instance, { params }),
     update: (id: string, params: UpdateCustomerParams) =>
       staticWrapper(updateCustomer, instance, { id, params }),
-    delete: (id: string) => staticWrapper(deleteCustomer, instance, { id }),
+    delete: (id: string, params?: DeleteCustomerParams) => staticWrapper(deleteCustomer, instance, { id, params }),
 
     billingPortal: (id: string, params?: BillingPortalParams) =>
       staticWrapper(billingPortal, instance, { id, params }),
@@ -85,11 +86,13 @@ export const updateCustomer = async ({
 export const deleteCustomer = async ({
   instance,
   id,
+  params,
 }: {
   instance: Autumn;
   id: string;
+  params?: DeleteCustomerParams;
 }): AutumnPromise<Customer> => {
-  return instance.delete(`/customers/${id}`);
+  return instance.delete(`/customers/${id}${params?.delete_in_stripe ? "?delete_in_stripe=true" : ""}`);
 };
 
 export const billingPortal = async ({
