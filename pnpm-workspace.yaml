@@ -1,12 +1,15 @@
 packages:
-  - "package"
-  - "frameworks/*"
-  - "nextjs"
-  - "compose"
-  - "cli" 
-  - "atmn"
-  - "ui"
-  - "test-worker"
-  - "next15"
-  - "next-bug"
-  - "vite-spa"
+  - package
+  - frameworks/*
+  - nextjs
+  - compose
+  - cli
+  - atmn
+  - ui
+  - test-worker
+  - next15
+  - next-bug
+  - vite-spa
+
+ignoredBuiltDependencies:
+  - better-sqlite3

@@ -33,3 +33,6 @@ debug
 frameworks
 !frameworks/conv/
 launch-demo
+nextjs/better-auth_migrations
+nextjs/database.sqlite
+nextjs/sqlite.db

@@ -1,5 +1,6 @@
-import { createAuthEndpoint } from "better-auth/plugins";
+import { createAuthEndpoint, createAuthMiddleware, InferOrganization, Organization } from "better-auth/plugins";
 import {
+  Session,
   type AuthContext,
   type BetterAuthClientPlugin,
   type BetterAuthPlugin,
@@ -13,7 +14,7 @@ import { Autumn } from "../../sdk/client";
 import { findRoute } from "rou3";
 import { getSessionFromCtx, sessionMiddleware } from "better-auth/api";
 import { z } from "zod/v4";
-
+import { AutumnOptions } from "./utils/betterAuth/types";
 import {
   TrackParamsSchema,
   CancelParamsSchema,
@@ -27,6 +28,8 @@ import {
   AttachParamsSchema,
   CheckoutParamsSchema,
 } from "@sdk/general/attachTypes";
+import { CreateEntityParamsSchema, GetEntityParamsSchema } from "@/client/types/clientEntTypes";
+import { organizationMiddleware, identityMiddleware } from "./utils/betterAuth/middlewares";
 
 const router = createRouterWithOptions();
 
@@ -51,7 +54,7 @@ const handleReq = async ({
   session,
 }: {
   ctx: EndpointContext<any, any, AuthContext>;
-  options?: { url?: string; secretKey?: string };
+  options?: AutumnOptions;
   method: string;
   session?: any;
 }) => {
@@ -90,49 +93,86 @@ const handleReq = async ({
 
   // const body = toSnakeCase(ctx.body, ["checkoutSessionParams"]);
   const body = ctx.body;
+  const params = ctx.params;
   const finalSession = session || ctx.context.session;
+  let identify: any;
 
-  const identify = async () => {
-    if (!finalSession) {
-      return;
-    }
-    return {
-      customerId: finalSession.user.id,
-      customerData: {
-        email: finalSession.user.email,
-        name: finalSession.user.name,
+  if (options?.identify) {
+    identify = () => options.identify?.({
+      session: finalSession,
+      organization: {
+        ...(ctx.context as any).activeOrganization,
+        ownerEmail: (ctx.context as any).activeOrganizationEmail,
       },
+    });
+  } else {
+    identify = () => {
+      if (!finalSession) {
+        return;
+      }
+      return {
+        customerId: finalSession.user.id,
+        customerData: {
+          email: finalSession.user.email,
+          name: finalSession.user.name,
+        },
+      };
     };
-  };
+  }
 
   const result = await handler({
     autumn: client,
     body,
     path: pathname,
     getCustomer: identify,
-    pathParams,
+    pathParams: params,
     searchParams,
   });
 
   if (result.statusCode >= 400) {
     throw new APIError(result.statusCode, {
-      message: result.body.message,
-      code: result.body.code,
+      message: result.body.message ?? "Unknown error",
+      code: result.body.code ?? "unknown_error",
     });
   }
 
   return ctx.json(result.body, { status: result.statusCode });
 };
 
-export const autumn = (options?: { url?: string; secretKey?: string }) => {
+export const autumn = (options?: AutumnOptions) => {
   return {
     id: "autumn",
     endpoints: {
+      identifyOrg: createEndpoint(
+        "/autumn/identify-org",
+        {
+          method: "GET",
+          use: [
+            sessionMiddleware,
+            organizationMiddleware,
+            identityMiddleware(options),
+          ],
+        },
+        async (ctx) => {
+          const session = await getSessionFromCtx(ctx as any);
+          const org = (ctx.context as any).activeOrganization;
+          return ctx.json({
+            orgId: org?.id,
+            identity: (ctx.context as any).autumnIdentity,
+            session,
+            org,
+          });
+        }
+      ),
       createCustomer: createEndpoint(
         "/autumn/customers",
         {
           method: "POST",
-          use: [],
+          use: [
+            sessionMiddleware,
+            organizationMiddleware,
+            identityMiddleware(options),
+          ],
           body: z.object({
             errorOnNotFound: z.boolean().optional(),
             expand: z.array(CustomerExpandEnum).optional(),
@@ -151,7 +191,7 @@ export const autumn = (options?: { url?: string; secretKey?: string }) => {
         "/autumn/products",
         {
           method: "GET",
-          use: [],
+          use: [sessionMiddleware, organizationMiddleware, identityMiddleware(options)],
         },
         async (ctx) => {
           const session = await getSessionFromCtx(ctx);
@@ -165,7 +205,7 @@ export const autumn = (options?: { url?: string; secretKey?: string }) => {
           body: CheckoutParamsSchema.omit({
             customer_id: true,
           }),
-          use: [sessionMiddleware],
+          use: [sessionMiddleware, organizationMiddleware, identityMiddleware(options)],
         },
         async (ctx) => handleReq({ ctx, options, method: "POST" })
       ),
@@ -176,7 +216,7 @@ export const autumn = (options?: { url?: string; secretKey?: string }) => {
           body: AttachParamsSchema.omit({
             customer_id: true,
           }),
-          use: [sessionMiddleware],
+          use: [sessionMiddleware, organizationMiddleware, identityMiddleware(options)],
         },
         async (ctx) => handleReq({ ctx, options, method: "POST" })
       ),
@@ -188,7 +228,7 @@ export const autumn = (options?: { url?: string; secretKey?: string }) => {
           body: CheckParamsSchema.omit({
             customer_id: true,
           }),
-          use: [sessionMiddleware],
+          use: [sessionMiddleware, organizationMiddleware, identityMiddleware(options)],
         },
         async (ctx) => handleReq({ ctx, options, method: "POST" })
       ),
@@ -199,7 +239,7 @@ export const autumn = (options?: { url?: string; secretKey?: string }) => {
           body: TrackParamsSchema.omit({
             customer_id: true,
           }),
-          use: [sessionMiddleware],
+          use: [sessionMiddleware, organizationMiddleware, identityMiddleware(options)],
         },
         async (ctx) => handleReq({ ctx, options, method: "POST" })
       ),
@@ -210,7 +250,7 @@ export const autumn = (options?: { url?: string; secretKey?: string }) => {
           body: CancelParamsSchema.omit({
             customer_id: true,
           }),
-          use: [sessionMiddleware],
+          use: [sessionMiddleware, organizationMiddleware, identityMiddleware(options)],
         },
         async (ctx) => {
           return await handleReq({ ctx, options, method: "POST" });
@@ -236,7 +276,7 @@ export const autumn = (options?: { url?: string; secretKey?: string }) => {
           body: RedeemReferralCodeParamsSchema.omit({
             customer_id: true,
           }),
-          use: [sessionMiddleware],
+          use: [sessionMiddleware, organizationMiddleware, identityMiddleware(options)],
         },
         async (ctx) => {
           return await handleReq({ ctx, options, method: "POST" });
@@ -251,16 +291,44 @@ export const autumn = (options?: { url?: string; secretKey?: string }) => {
           metadata: {
             isAction: false,
           },
-          use: [sessionMiddleware],
+          use: [sessionMiddleware, organizationMiddleware, identityMiddleware(options)],
         },
         async (ctx) => await handleReq({ ctx, options, method: "POST" })
+      ),
+
+      createEntity: createAuthEndpoint(
+        "/autumn/entities",
+        {
+          method: "POST",
+          body: CreateEntityParamsSchema.omit({
+            featureId: true,
+          }).extend({
+            feature_id: z.string(),
+          }),
+          use: [sessionMiddleware, organizationMiddleware, identityMiddleware(options)],
+        },
+        async (ctx) => {
+          return await handleReq({ ctx, options, method: "POST" });
+        }
+      ),
+
+      getEntity: createAuthEndpoint(
+        "/autumn/entities/:entityId",
+        {
+          method: "GET",
+          use: [sessionMiddleware, organizationMiddleware, identityMiddleware(options)]
+        },
+        async (ctx) => await handleReq({ ctx, options, method: "GET" })
+      ),
+
+      deleteEntity: createAuthEndpoint(
+        "/autumn/entities/:entityId",
+        {
+          method: "DELETE",
+          use: [sessionMiddleware, organizationMiddleware, identityMiddleware(options)],
+        },
+        async (ctx) => await handleReq({ ctx, options, method: "DELETE" })
       ),
     },
   } satisfies BetterAuthPlugin;
 };
-
-export const autumnClient = () =>
-  ({
-    id: "autumn",
-    $InferServerPlugin: {} as ReturnType<typeof autumn>,
-  }) satisfies BetterAuthClientPlugin;

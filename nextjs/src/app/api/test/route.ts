@@ -1,12 +1,10 @@
+"use server";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
-  const data = await auth.api.createCustomer({
+  const data = await auth.api.identifyOrg({
     headers: req.headers,
-    body: {
-      expand: ["invoices"],
-    },
   });
 
   console.log(data);

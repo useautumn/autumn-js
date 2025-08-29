@@ -6,9 +6,9 @@ import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-const Dialog = DialogPrimitive.Root;
+const Dialog: typeof DialogPrimitive.Root = DialogPrimitive.Root;
 
-const DialogTrigger = DialogPrimitive.Trigger;
+const DialogTrigger: typeof DialogPrimitive.Trigger = DialogPrimitive.Trigger;
 
 const DialogPortal = ({
   children,
@@ -21,12 +21,14 @@ const DialogPortal = ({
   );
 };
 
-const DialogClose = DialogPrimitive.Close;
+const DialogClose: typeof DialogPrimitive.Close = DialogPrimitive.Close;
 
-const DialogOverlay = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
+type DialogOverlayRef = React.ElementRef<typeof DialogPrimitive.Overlay>;
+type DialogOverlayProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>;
+
+const DialogOverlay: React.ForwardRefExoticComponent<
+  DialogOverlayProps & React.RefAttributes<DialogOverlayRef>
+> = React.forwardRef<DialogOverlayRef, DialogOverlayProps>(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
@@ -38,10 +40,12 @@ const DialogOverlay = React.forwardRef<
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
-const DialogContent = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+type DialogContentRef = React.ElementRef<typeof DialogPrimitive.Content>;
+type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>;
+
+const DialogContent: React.ForwardRefExoticComponent<
+  DialogContentProps & React.RefAttributes<DialogContentRef>
+> = React.forwardRef<DialogContentRef, DialogContentProps>(({ className, children, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -90,10 +94,12 @@ const DialogFooter = ({
 );
 DialogFooter.displayName = "DialogFooter";
 
-const DialogTitle = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({ className, ...props }, ref) => (
+type DialogTitleRef = React.ElementRef<typeof DialogPrimitive.Title>;
+type DialogTitleProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>;
+
+const DialogTitle: React.ForwardRefExoticComponent<
+  DialogTitleProps & React.RefAttributes<DialogTitleRef>
+> = React.forwardRef<DialogTitleRef, DialogTitleProps>(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
@@ -105,10 +111,12 @@ const DialogTitle = React.forwardRef<
 ));
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
-const DialogDescription = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({ className, ...props }, ref) => (
+type DialogDescriptionRef = React.ElementRef<typeof DialogPrimitive.Description>;
+type DialogDescriptionProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>;
+
+const DialogDescription: React.ForwardRefExoticComponent<
+  DialogDescriptionProps & React.RefAttributes<DialogDescriptionRef>
+> = React.forwardRef<DialogDescriptionRef, DialogDescriptionProps>(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
     className={cn("au-text-sm au-text-muted-foreground", className)}

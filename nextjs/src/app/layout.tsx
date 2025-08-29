@@ -26,9 +26,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        <AutumnProvider >
+    <html lang="en" className="h-full w-full min-w-screen">
+              <body className="h-full m-0 p-0 w-full min-w-screen">
+        <AutumnProvider betterAuthUrl="http://localhost:3001">
           {children}
         </AutumnProvider>
       </body>

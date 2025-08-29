@@ -118,7 +118,10 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
+  html, body {
+    @apply bg-background text-foreground w-full h-full m-0 p-0 min-w-screen;
+  }
+  #__next {
+    @apply w-full h-full min-w-screen;
   }
 }
