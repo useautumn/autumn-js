@@ -29,15 +29,16 @@ export const toContainerResult = async ({
         logger.error(`[Autumn] ${error.message}`);
       }
     } catch (error) {
+      // biome-ignore lint/complexity/noUselessCatch: idk
       throw error;
-      return {
-        data: null,
-        error: new AutumnError({
-          message: "Failed to parse JSON response from Autumn",
-          code: "internal_error",
-        }),
-        statusCode: response.status,
-      };
+      // return {
+      //   data: null,
+      //   error: new AutumnError({
+      //     message: "Failed to parse JSON response from Autumn",
+      //     code: "internal_error",
+      //   }),
+      //   statusCode: response.status,
+      // };
     }
 
     return {
@@ -51,22 +52,23 @@ export const toContainerResult = async ({
   }
 
   try {
-    let data = await response.json();
+    const data = await response.json();
     return {
       data: data,
       error: null,
       statusCode: response?.status,
     };
   } catch (error) {
+    // biome-ignore lint/complexity/noUselessCatch: idk
     throw error;
-    return {
-      data: null,
-      error: new AutumnError({
-        message: "Failed to parse Autumn API response",
-        code: "internal_error",
-      }),
-      statusCode: response?.status,
-    };
+    // return {
+    //   data: null,
+    //   error: new AutumnError({
+    //     message: "Failed to parse Autumn API response",
+    //     code: "internal_error",
+    //   }),
+    //   statusCode: response?.status,
+    // };
   }
 };
 

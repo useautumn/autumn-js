@@ -1,16 +1,14 @@
 "use client";
+import {
+	CheckoutDialog,
+	PricingTable,
+	useCustomer,
+	useEntity
+} from "autumn-js/react";
+// import PricingTable from "@/components/autumn/pricing-table";
 // import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import {
-	PaywallDialog,
-	PricingTable,
-	useCustomer,
-	useEntity,
-} from "autumn-js/react";
-import { useEffect, useState } from "react";
-// import PricingTable from "@/components/autumn/pricing-table";
-import { default as BlockingPaywallDialog } from "@/components/autumn/paywall-dialog";
 
 export default function Home() {
 	const {
@@ -28,10 +26,12 @@ export default function Home() {
 		refetch: refetchCustomer,
 		// allowed,
 	} = useCustomer();
-	const { data: session, refetch: refetchSession } = authClient.useSession();
+	const { data: session, refetch: refetchSession, isPending } = authClient.useSession();
 	const { data: organisation } = authClient.useActiveOrganization();
 	const { data: orgs } = authClient.useListOrganizations();
-	const { entity, refetch: refetchEntity } = useEntity("test_" + (session?.session.activeOrganizationId ?? "default"));
+	const { entity, refetch: refetchEntity } = useEntity(
+		"test_" + (session?.session.activeOrganizationId ?? "default"),
+	);
 
 	// useEffect(() => {
 	//   check({ featureId: "create_thinkfasts", dialog: BlockingPaywallDialog });
@@ -40,8 +40,8 @@ export default function Home() {
 	// useEffect(() => {
 	//   check({ featureId: "create_thinkfasts", dialog: PaywallDialog });
 	// }, [isLoading]);
-
-	return (
+	if(isPending) return <div>Loading...</div>;
+	else return (
 		<div className="min-h-screen w-screen flex">
 			{/* Left Column - Actions & Pricing */}
 			<div className="flex-1 min-h-screen overflow-y-auto p-10 space-y-8">
@@ -133,11 +133,11 @@ export default function Home() {
 							onClick={async () => {
 								const res = await authClient.organization.setActive({
 									organizationId: orgs?.find(
-										(org) => org.name === "Test Organization"
+										(org) => org.name === "Test Organization",
 									)?.id,
 								});
 								refetchSession();
-								refetchCustomer();  
+								refetchCustomer();
 								refetchEntity();
 								console.log(res);
 							}}
@@ -148,7 +148,7 @@ export default function Home() {
 							onClick={async () => {
 								const res = await authClient.organization.setActive({
 									organizationId: orgs?.find(
-										(org) => org.name === "Test Organization 2"
+										(org) => org.name === "Test Organization 2",
 									)?.id,
 								});
 								refetchSession();
@@ -165,7 +165,7 @@ export default function Home() {
 									"http://localhost:3001/api/test/deleteAllOrgs",
 									{
 										method: "GET",
-									}
+									},
 								);
 								const data = await res.json();
 								refetchSession();
@@ -180,10 +180,11 @@ export default function Home() {
 						<Button
 							onClick={async () => {
 								const res = await createEntity({
-									id: "test_" + (session?.session.activeOrganizationId ?? "default"),
+									id: `test_${session?.session.activeOrganizationId ?? "default"}`,
 									name: "Test Entity",
 									featureId: "test",
 								});
+								console.log(res);
 								refetchCustomer();
 								refetchEntity();
 							}}
@@ -192,15 +193,15 @@ export default function Home() {
 						</Button>
 						<Button
 							onClick={async () => {
-								const entity = useEntity("test");
-								console.log(entity.entity);
+								// const entity = useEntity("test");
+								// console.log(entity.entity);
 							}}
 						>
 							Get Entity
 						</Button>
 						<Button
 							onClick={async () => {
-								const entity = useEntity("test");
+								// const entity = useEntity("test");
 								refetchEntity();
 							}}
 						>
@@ -223,6 +224,7 @@ export default function Home() {
 							onClick={async () => {
 								const res = await cancel({
 									productId: "pro",
+									cancelImmediately: true,
 								});
 								console.log(res);
 							}}
@@ -254,6 +256,7 @@ export default function Home() {
 								const res = await checkout({
 									productId: "pro",
 									successUrl: "https://facebook.com",
+									dialog: CheckoutDialog
 								});
 								console.log(res);
 							}}
@@ -284,7 +287,7 @@ export default function Home() {
 						<Button
 							onClick={async () => {
 								const res = await redeemReferralCode({
-									code: "test",
+									code: "XCA1I1",
 								});
 								console.log(res);
 							}}
@@ -438,7 +441,7 @@ export default function Home() {
 															<p>
 																<span className="font-medium">Started:</span>{" "}
 																{new Date(
-																	product.started_at
+																	product.started_at,
 																).toLocaleDateString()}
 															</p>
 														)}
@@ -463,13 +466,13 @@ export default function Home() {
 																					{item.included_usage}
 																				</p>
 																			</div>
-																		)
+																		),
 																	)}
 																</div>
 															</div>
 														)}
 													</div>
-												)
+												),
 											)}
 										</div>
 									</div>
@@ -518,12 +521,12 @@ export default function Home() {
 															<p>
 																<span className="font-medium">Next Reset:</span>{" "}
 																{new Date(
-																	feature.next_reset_at
+																	feature.next_reset_at,
 																).toLocaleDateString()}
 															</p>
 														)}
 													</div>
-												)
+												),
 											)}
 										</div>
 									</div>

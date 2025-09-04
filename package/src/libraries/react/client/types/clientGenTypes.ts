@@ -34,16 +34,20 @@ export const TrackParamsSchema = z.object({
 
 export type TrackParams = z.infer<typeof TrackParamsSchema>;
 
-export interface OpenBillingPortalParams {
-  returnUrl?: string;
-  openInNewTab?: boolean;
-}
+export const OpenBillingPortalParamsSchema = z.object({
+  returnUrl: z.string().optional(),
+  openInNewTab: z.boolean().optional(),
+});
 
-export interface SetupPaymentParams {
-  successUrl?: string;
-  checkoutSessionParams?: Record<string, any>;
-  openInNewTab?: boolean;
-}
+export type OpenBillingPortalParams = z.infer<typeof OpenBillingPortalParamsSchema>;
+
+export const SetupPaymentParamsSchema = z.object({
+  successUrl: z.string().optional(),
+  checkoutSessionParams: z.record(z.string(), z.any()).optional(),
+  openInNewTab: z.boolean().optional(),
+});
+
+export type SetupPaymentParams = z.infer<typeof SetupPaymentParamsSchema>;
 
 export const QueryParamsSchema = z.object({
   featureId: z.string().or(z.array(z.string())),
