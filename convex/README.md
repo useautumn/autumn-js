@@ -105,7 +105,7 @@ export function AutumnWrapper({ children }: { children: React.ReactNode }) {
 
 ## Using hooks and components on the frontend
 
-The quickest way to get started is to use our <PricingTable/> component:
+The quickest way to get started is to use our `<PricingTable/>` component:
 
 
 `<PricingTable/>`
